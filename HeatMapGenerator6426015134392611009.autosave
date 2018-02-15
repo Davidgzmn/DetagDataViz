@@ -1,0 +1,150 @@
+Table table;
+float scaleValue;
+float ellipseRadius;
+float ellipseRadiusHeatmap;
+float ellipseAlpha;
+float lineX;
+float lineXNext;
+float lineY;
+float lineYNext;
+PImage img;
+float offsetX;
+float offsetY;
+int drawMode;
+int counter;
+JSONArray jsonValues;
+
+void setup()
+{
+
+  frameRate(120);
+  size (1085,799);
+  jsonValues = loadJSONArray("position.json");
+  scaleValue = 4.5;
+  ellipseRadius = 5;
+  ellipseRadiusHeatmap = 50;
+  ellipseAlpha = 50;
+  offsetX = -400;
+  offsetY=115;
+  drawMode=0;
+
+  //img = loadImage("map.png");
+  counter = 0;
+}
+
+void draw(){
+//background(img);
+background(0);
+noStroke();
+if(drawMode == 0) //Draw ellipses on the positions recorded
+{
+    fill(250,0,0,255);
+      //for(int i=0 ; i<table.getRowCount() ;i++)
+      for(int i=0 ; i<counter ;i++)
+      {
+        JSONObject pos = jsonValues.getJSONObject(i);
+        float ellipsePosX = offsetX + width/2+pos.getFloat("x")*scaleValue;
+        float ellipsePosY =   offsetY + pos.getFloat("z")*scaleValue;
+        ellipse(ellipsePosX,height + ellipsePosY*-1, ellipseRadius, ellipseRadius);
+      }
+      counter ++;
+      if(counter == jsonValues.size()){
+          counter = 0;
+      }
+}
+if(drawMode == 1){ //Draw connected lines showing the movement
+    fill(0,255,0,255);
+    stroke(0,255,0);
+      //for(int i=0 ; i<table.getRowCount() ;i++)
+      for(int i=0 ; i<counter ;i++)
+      {
+        JSONObject pos = jsonValues.getJSONObject(i);
+        JSONObject posNext = jsonValues.getJSONObject(i+1);
+        //float ellipsePosX = offsetX + width/2+pos.getFloat("x")*scaleValue;
+        //float ellipsePosY =   offsetY + pos.getFloat("z")*scaleValue;
+        //ellipse(ellipsePosX,height + ellipsePosY*-1, ellipseRadius, ellipseRadius);
+        lineX = offsetX + width/2+pos.getFloat("x")*scaleValue;
+        lineXNext = offsetX + width/2+posNext.getFloat("x")*scaleValue;
+        lineY = offsetY + pos.getFloat("z")*scaleValue;
+        lineYNext = offsetY + posNext.getFloat("z")*scaleValue;
+
+        line(lineX,height +lineY*-1,lineXNext,height +lineYNext*-1);
+        float ellipsePosX = offsetX + width/2+pos.getFloat("x")*scaleValue;
+        float ellipsePosY =   offsetY + pos.getFloat("z")*scaleValue;
+        ellipse(ellipsePosX,height + ellipsePosY*-1, ellipseRadius, ellipseRadius);
+      }
+      counter ++;
+      if(counter == jsonValues.size()-1){
+          counter = 0;
+      }
+
+}
+if(drawMode ==2) //Draw ellipses on the positions recorded
+{
+    fill(250,0,0,ellipseAlpha);
+      //for(int i=0 ; i<table.getRowCount() ;i++)
+      for(int i=0 ; i<jsonValues.size() ;i++)
+      {
+        JSONObject pos = jsonValues.getJSONObject(i);
+        float ellipsePosX = offsetX + width/2+pos.getFloat("x")*scaleValue;
+        float ellipsePosY =   offsetY + pos.getFloat("z")*scaleValue;
+        ellipse(ellipsePosX,height + ellipsePosY*-1, ellipseRadiusHeatmap, ellipseRadiusHeatmap);
+      }
+
+}
+
+
+}
+
+void keyPressed() { //Controls for moving the visualization around
+    if(key == ' '){
+        drawMode++;
+        drawMode = drawMode % 3;
+    }
+  if (key == 'w') {
+    scaleValue += .5;
+  }
+  if (key == 's') {
+    scaleValue -= .5;
+  }
+  if (key == 'k') {
+    ellipseRadiusHeatmap -=5;
+  }
+  if (key == 'l') {
+    ellipseRadiusHeatmap +=5;
+  }
+  if (keyCode == RIGHT) {
+    offsetX++;
+  }
+  if (keyCode == LEFT) {
+    offsetX--;
+  }
+  if (keyCode == UP) {
+    offsetY++;
+  }
+  if (keyCode == DOWN) {
+    offsetY--;
+  }
+
+  if(key == '.'){
+    ellipseAlpha += 10;
+  }
+  if(key == ','){
+    ellipseAlpha -= 10;
+  }
+
+  if (key == 'p'){
+    println("Scale Value: " + scaleValue);
+    println("Offset X: " + offsetX);
+    println("Offset Y: " + offsetY);
+    println("Counter: " + counter);
+    println("Linex: " + lineX);
+    println("lineXNext: " + lineXNext);
+    println("lineY: " + lineY);
+    println("lineYNext: " + lineYNext);
+
+  }
+  if(key == 'u'){
+      println("Space pressed");
+  }
+}
